@@ -1,29 +1,20 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This is a global repository which would contain modules that are common across all deep learning computer vision applications. 
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Packages and modules which can be used globally. 
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+This repository should be clone as a submodule in order to use the packages/modules or scripts with this repository. 
 
 ### Contribution guidelines ###
 
 * Writing tests
 * Code review
-* Other guidelines
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* Benchmark Team 
