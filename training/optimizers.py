@@ -89,10 +89,17 @@ class StepDecaySchedule(object):
     self.drop_schedule.sort()
     self.drop_rate = drop_rate
     self.total_epochs = total_epochs
+    self.built = False
+
+  def build(self):
     assert lambda x: x > 0 in self.drop_schedule
     assert max(self.drop_schedule) <= self.total_epochs
+    self.built = True
 
   def __call__(self, epoch: int):
+    if not self.built:
+      self.build()
+
     self.schedule = []
     for i in range(len(self.drop_schedule)):
       # store the learning rate change based on the drop rate.
@@ -181,12 +188,12 @@ def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
       "exponential_decay": LearningRateScheduler(ExponentialDecay(lr)),
       "step_decay": LearningRateScheduler(StepDecay(
           lr,
-          lr_params['drop_rate'],
+          lr_params['decay_rate'],
           lr_params['drop_after_num_epoch'])),
       "step_decay_schedule": LearningRateScheduler(StepDecaySchedule(
           lr,
           lr_params['drop_schedule'],
-          lr_params['drop_rate'],
+          lr_params['decay_rate'],
           total_epochs)),
       "polynomial_decay": LearningRateScheduler(PolynomialDecay(
           lr,
@@ -203,7 +210,7 @@ def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
           total_epochs)),
       "lr_reduce_on_plateau": ReduceLROnPlateau(
           monitor='val_loss',
-          factor=lr_params['factor'],
+          factor=lr_params['decay_rate'],
           patience=lr_params['patience'],
           verbose=0,
           mode='auto',
