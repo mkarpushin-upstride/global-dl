@@ -29,8 +29,6 @@ def create_dir_or_empty(path: str):
   return create_dir(path)
 
 
-
-
 # list of [type, name, default, help, condition] or ['namespace', name, List]
 # if condition is specified and false, then raise an exception
 # type can be :
@@ -155,6 +153,7 @@ def create_env_directories(args, experiment_name):
   export_dir = os.path.join(args['export_dir'], experiment_name) if args['export_dir'] else None
   return checkpoint_dir, log_dir, export_dir
 
+
 def setup_mp(args):
   if args['configuration']['with_mixed_precision']:
     print('Training with Mixed Precision')
@@ -177,6 +176,7 @@ def define_model_in_strategy(args, get_model):
     model, optimizer = get_model(args)
   return model, optimizer
 
+
 def get_callbacks(args, log_dir):
   # define callbacks
   if args['configuration']['profiler']:
@@ -189,3 +189,14 @@ def get_callbacks(args, log_dir):
         get_lr_scheduler(args['lr'], args['num_epochs'], args['lr_decay_strategy']['lr_params'])
     )
   return callbacks
+
+
+def init_custom_checkpoint_callbacks(trackable_objects, ckpt_dir):
+  checkpoint = tf.train.Checkpoint(**trackable_objects)
+  manager = tf.train.CheckpointManager(checkpoint, directory=ckpt_dir, max_to_keep=5)
+  latest = manager.restore_or_initialize()
+  latest_epoch = 0
+  if latest is not None:
+    print(f'restore {manager.latest_checkpoint}')
+    latest_epoch = int(manager.latest_checkpoint.split('-')[-1])
+  return tf.keras.callbacks.LambdaCallback(on_epoch_end=lambda epoch, logs: manager.save()), latest_epoch

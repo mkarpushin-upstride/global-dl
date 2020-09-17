@@ -4,14 +4,24 @@ import unittest
 import tensorflow as tf
 import numpy as np
 from .export import export
-from .models.test_generic_model import Model1
+
+
+def get_model():
+  inputs = tf.keras.layers.Input(shape=(224, 224, 3))
+  x = tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1')(inputs)
+  x = tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv2')(x)
+  x = tf.keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
+  x = tf.keras.layers.Activation("softmax", dtype=tf.float32)(x)
+  model = tf.keras.Model(inputs, x)
+  return model
 
 
 class TestExport(unittest.TestCase):
   def test_export(self):
     export_path = tempfile.mkdtemp()
-    model = Model1('mix_type2', factor=4, n_layers_before_tf=1).model
-    export(model, export_path, {'export_strategy_cloud': ""})
+    model = get_model()
+    export(model, export_path, {'export_strategy_cloud': "",
+                                'tensorrt': {'export_to_tensorrt': False}})
 
     image = np.ones((1, 224, 224, 3), dtype=np.float32)/127.5 - 1.
 
