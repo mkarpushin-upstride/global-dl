@@ -219,10 +219,10 @@ def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
   return get_lr[lr_schedule_name]
 
 
-def get_optimizer(lr: float, optimizer_param: dict):
+def get_optimizer(optimizer_param: dict):
 
   optimizer_name = optimizer_param['name'].lower()
-
+  lr = optimizer_param['lr']
   optimizer = {
       'adadelta': Adadelta(lr),
       'adagrad': Adagrad(lr),
