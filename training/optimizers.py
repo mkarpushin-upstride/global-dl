@@ -31,6 +31,27 @@ learning_schedule_list = [
 
 _END_LEARNING_RATE = 0.00001
 
+arguments = [
+    [str, 'name', 'sgd_nesterov', 'optimized to be used', lambda x: x.lower() in optimizer_list],
+    [float, 'momentum', 0.9, 'used when optimizer name is specified as sgd_momentum'],
+    [float, "lr", 0.0001, 'learning rate', lambda x: x > 0],
+    ['namespace', 'lr_decay_strategy', [
+        [bool, 'activate', True, 'if true then use this callback'],
+        ['namespace', 'lr_params', [
+            [str, 'strategy', 'lr_reduce_on_plateau', 'learning rate decay schedule', lambda x: x.lower() in learning_schedule_list],
+            [int, 'power', 5, 'used only in polynomial_decay, determines the nth degree polynomial'],
+            [float, 'alpha', 0.01, 'used only in cosine decay, Minimum learning rate value as a fraction of initial_learning_rate. '],
+            [int, 'patience', 10, 'used only in lr_reduce_on_plateau, if validation loss doesn\'t improve for this number of epoch, then reduce the learning rate'],
+            [float, 'decay_rate', 0.5, 'used step_decay, step_decay_schedule, inverse_time_decay, lr_reduce_on_plateau, determines the factor to drop the lr'],
+            [float, 'min_lr', 0.00001, 'usef in lr_reduce_on_plateau'],
+            [int, 'drop_after_num_epoch', 10, 'used in step_decay, reduce lr after specific number of epochs'],
+            ['list[int]', 'drop_schedule', [30, 50, 70], 'used in step_decay_schedule, reduce lr after specific number of epochs'],
+            [float, 'decay_step', 1.0, 'used in inverse time decay, decay_step controls how fast the decay rate reduces '],
+            [bool, 'staircase', False, 'if true then return the floor value of inverse_time_decay'],
+        ]],
+    ]],
+]
+
 
 class ExponentialDecay(object):
   """Applies exponential decay to the learning rate after each epoch. 
@@ -181,7 +202,6 @@ class CosineDecay(object):
 
 
 def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
-
   lr_schedule_name = lr_params['strategy'].lower()
 
   get_lr = {
@@ -220,7 +240,6 @@ def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
 
 
 def get_optimizer(optimizer_param: dict):
-
   optimizer_name = optimizer_param['name'].lower()
   lr = optimizer_param['lr']
   optimizer = {

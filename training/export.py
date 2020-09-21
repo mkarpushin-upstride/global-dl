@@ -12,39 +12,16 @@ import tensorflow as tf
 from .trt_convert import convert_to_tensorrt
 from .alchemy_api import send_exported_model
 
-export_strategies = ['aws',  # push model to aws bucket
-                     'upstride',  # push model to upstride API
+export_strategies = ['upstride',  # push model to upstride plateform
                      '']  # do nothing
 
-
-def aws(model_tar):
-  import boto3
-  from botocore.exceptions import NoCredentialsError
-  """
-    Prior launching the docker ensure credentials are configured via "aws configure"
-    and your "/home/$USER/.aws/ is mapped to "/.aws/"
-    """
-  logger = logging.getLogger("SaveModel")
-  os.environ['AWS_SHARED_CREDENTIALS_FILE'] = "/.aws/credentials"
-  s3 = boto3.resource("s3")
-  bucket = s3.Bucket("modelzoo")
-
-  try:
-    logger.info("Trying to upload modelzoo.")
-    bucket.upload_file(model_tar, path + ".tar")  # upload tar file to s3
-  except NoCredentialsError as err:
-    logger.error(err)
-    logger.info("S3 upload failed, Model available locally at {}".format(path))
-  # TODO handle other types of exceptions later.
-
-
-def upstride(archive_path, args):
+def upstride(archive_path, config):
   """call the main swagger upstride api to define a new experiment result and push the model
   """
-  send_exported_model(args, archive_path)
+  send_exported_model(config, archive_path)
 
 
-def export(model, path, args):
+def export(model, path, config):
   logger = logging.getLogger("SaveModel")
   tmp_dir = tempfile.mkdtemp()
   if path is None:
@@ -52,12 +29,12 @@ def export(model, path, args):
 
   tf.saved_model.save(model, path)
   # WIP - use export_to_tensorrt: False for now
-  if args['tensorrt']['export_to_tensorrt']:
+  if config['tensorrt']['export_to_tensorrt']:
     convert_to_tensorrt(
         path,
-        image_size=args['processed_size'],
-        batch_size=args['batch_size'],
-        precision=args['tensorrt']['precision_tensorrt'])
+        image_size=config['processed_size'],
+        batch_size=config['batch_size'],
+        precision=config['tensorrt']['precision_tensorrt'])
 
   # creates the tar file
   print('compress')
@@ -66,10 +43,8 @@ def export(model, path, args):
     tar.add(path)
   print('compress done')
 
-  if 'aws' in args['export_strategy_cloud']:
-    aws(model_tar)
-  if 'upstride' in args['export_strategy_cloud']:
-    upstride(model_tar, args)
+  if 'upstride' in config['export_strategy_cloud']:
+    upstride(model_tar, config)
 
   shutil.rmtree(tmp_dir)  # remove local model directory
   logger.info("Model saved Successfully")
