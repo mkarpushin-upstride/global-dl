@@ -232,7 +232,7 @@ def get_lr_scheduler(lr: float, total_epochs: int, lr_params: dict):
           monitor='val_loss',
           factor=lr_params['decay_rate'],
           patience=lr_params['patience'],
-          verbose=0,
+          verbose=1,
           mode='auto',
           min_lr=lr_params['min_lr'])
   }
