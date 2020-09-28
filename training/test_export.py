@@ -20,8 +20,17 @@ class TestExport(unittest.TestCase):
   def test_export(self):
     export_path = tempfile.mkdtemp()
     model = get_model()
-    export(model, export_path, {'export_strategy_cloud': "",
-                                'tensorrt': {'export_to_tensorrt': False}})
+
+    args = {
+        'export': {
+            'strategy_cloud': '',
+            'tensorrt': {
+                'export': False
+            }
+        }
+    }
+
+    export(model, export_path, args)
 
     image = np.ones((1, 224, 224, 3), dtype=np.float32)/127.5 - 1.
 

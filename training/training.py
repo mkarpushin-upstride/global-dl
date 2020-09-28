@@ -1,9 +1,7 @@
 import os
 import tensorflow as tf
 from tensorflow.keras.mixed_precision import experimental as mixed_precision
-from .optimizers import get_lr_scheduler
-from submodules.global_dl.training.export import export_strategies
-from submodules.global_dl.training.optimizers import learning_schedule_list
+from .optimizers import get_lr_scheduler, learning_schedule_list
 
 
 def create_dir(path: str):
@@ -40,8 +38,6 @@ arguments = [
     [str, "checkpoint_dir", '', 'Checkpoints directory', create_dir],
     [str, 'title', '', 'title of the experiment'],
     [str, 'description', '', 'description of the experiment'],
-    [str, 'export_dir', '', 'If specified, export the model in this directory', create_dir_or_empty],
-    [str, 'export_strategy_cloud', 'upstride', 'to define how to export on the cloud', lambda x: x in export_strategies],
     [str, "log_dir", '', 'Log directory', create_dir],
     [int, "num_classes", 0, 'Number of classes', lambda x: x > 0],  # TODO this number should be computed from dataset
     [int, "num_epochs", 60, 'The number of epochs to run', lambda x: x > 0],
@@ -51,11 +47,6 @@ arguments = [
         [bool, 'profiler', False, 'if true then profile tensorflow training using tensorboard. Need tf >=2.2'],
     ]],
     ['list[int]', "input_size", [224, 224, 3], 'processed shape of each image'],
-    
-    ['namespace', 'tensorrt', [
-        [bool, 'export_to_tensorrt', False, 'If specified, converts the savemodel to TensorRT and saves within export_dir'],
-        [str, 'precision_tensorrt', 'FP16', 'Optimizes the TensorRT model to the precision specified'],
-    ]],
     [int, 'early_stopping', 20, 'stop  the training if validation loss doesn\'t decrease for n value'],
 ]
 
@@ -71,7 +62,7 @@ def create_env_directories(args, experiment_name):
   """
   checkpoint_dir = os.path.join(args['checkpoint_dir'], experiment_name)
   log_dir = os.path.join(args['log_dir'], experiment_name)
-  export_dir = os.path.join(args['export_dir'], experiment_name) if args['export_dir'] else None
+  export_dir = os.path.join(args['export']['dir'], experiment_name) if args['export']['dir'] else None
   return checkpoint_dir, log_dir, export_dir
 
 
