@@ -71,11 +71,11 @@ class ExponentialDecay(object):
 
 
 class StepDecay(object):
-  """Applies Step decay to the learning rate after each eppoch. 
+  """Applies Step decay to the learning rate after each epoch. 
   This schedule is called via the keras LearningRateScheduler at the end of the epoch. 
 
   Args:
-      initial_lr (float): initial learning rate when the tranining starts
+      initial_lr (float): initial learning rate when the traning starts
       drop_rate (float): drop_rate defines ratio to multiply the learning rate
       drop_after_num_epoch (int): after how many epochs the drop_rate has to be applied
 
@@ -92,12 +92,12 @@ class StepDecay(object):
 
 
 class StepDecaySchedule(object):
-  """Applies Step decay schedule to the learning rate after each eppoch. 
+  """Applies Step decay schedule to the learning rate after each epoch. 
   This schedule is called via the keras LearningRateScheduler at the end of the epoch. 
 
   Args:
-      initial_lr (float): initial learning rate when the tranining starts
-      drop_schedule (list[int]): list of integers to specifiy which epochs to reduce the lr
+      initial_lr (float): initial learning rate when the traning starts
+      drop_schedule (list[int]): list of integers to specify which epochs to reduce the lr
       drop_rate (float): drop_rate defines ratio to multiply the learning rate
       total_epochs (int): the length to which the lr decay should be applied
 
