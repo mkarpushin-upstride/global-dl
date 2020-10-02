@@ -12,7 +12,7 @@ from . import metrics
 SERVER_URL = 'https://api.upstride.io'
 
 arguments = [
-    [str, 'user', '', 'Username to connect to UpStride platform'],
+    [str, 'user', '', 'Username to connect to UpStride platform. If not provided then the code will not try to connect'],
     [str, 'password', '', 'Password to connect to UpStride platform'],
     [str, 'id', '', 'id of the training, provided by the server at the first post request'],
     [str, 'jwt', '', 'javascript web token for auth']
@@ -37,6 +37,8 @@ def send_metric_callbacks(config):
         logs: dictionary containing  loss, accuracy, top_k_categorical_accuracy, val...
 
     """
+    if not config['user']:
+      return
     # prepare message
     json_content = []
     for key in logs:
@@ -92,12 +94,13 @@ def send_model_info(model, config):
   Args:
       config (Dict): argument to connect to the server
   """
-  n_params = metrics.count_trainable_params(model)
-  n_flops = metrics.count_flops_efficient(model)
-  print("number of parameters:", n_params)
-  print("number of flops:", n_flops)
-  message = {
-      'n_flops': n_flops,
-      'n_params': n_params
-  }
-  r = requests.put(SERVER_URL + f'/training/model_info/{config["id"]}', json=message, auth=(config['user'], config['password']))
+  if config['password'] and config['user']:
+    n_params = metrics.count_trainable_params(model)
+    n_flops = metrics.count_flops_efficient(model)
+    print("number of parameters:", n_params)
+    print("number of flops:", n_flops)
+    message = {
+        'n_flops': n_flops,
+        'n_params': n_params
+    }
+    r = requests.put(SERVER_URL + f'/training/model_info/{config["id"]}', json=message, auth=(config['user'], config['password']))
