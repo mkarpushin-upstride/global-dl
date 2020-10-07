@@ -63,7 +63,6 @@ class TestCountFlops(unittest.TestCase):
     f = count_flops(model)
     ef = count_flops_efficient(model)
     self.assertTrue((f-ef)/f < 1e-4)
-    
 
   def test_conv2d_padding_same(self):
     i = tf.keras.layers.Input((224, 224, 3), batch_size=1)
@@ -99,7 +98,7 @@ class TestCountFlops(unittest.TestCase):
     f = count_flops(model)
     ef = count_flops_efficient(model)
     self.assertEqual(f, ef)
-    
+
   def test_dense_no_biases(self):
     i = tf.keras.layers.Input((1000), batch_size=1)
     x = tf.keras.layers.Dense(100, use_bias=False)(i)
@@ -117,3 +116,19 @@ class TestCountFlops(unittest.TestCase):
     f = count_flops(model)
     ef = count_flops_efficient(model)
     self.assertEqual(ef, 200100)
+
+  def test_depthwiseconv2d(self):
+    i = tf.keras.layers.Input((224, 224, 3), batch_size=1)
+    x = tf.keras.layers.DepthwiseConv2D(64, (3, 3), use_bias=False)(i)
+    model = tf.keras.Model(i, x)
+    f = count_flops(model)
+    ef = count_flops_efficient(model)
+    self.assertTrue((f-ef)/f < 1e-3)
+
+  def test_depthwiseconv2d_bias(self):
+    i = tf.keras.layers.Input((224, 224, 3), batch_size=1)
+    x = tf.keras.layers.DepthwiseConv2D(64, (3, 3), use_bias=True)(i)
+    model = tf.keras.Model(i, x)
+    f = count_flops(model)
+    ef = count_flops_efficient(model)
+    self.assertTrue((f-ef)/f < 1e-3)

@@ -68,6 +68,27 @@ def _count_flops_dense(layer):
   return flops
 
 
+def _count_flops_depthwiseconv2d(layer):
+  if layer.data_format == "channels_first":
+    input_channels = layer.input_shape[1]
+    output_channels, h, w, = layer.output_shape[1:]
+  elif layer.data_format == "channels_last":
+    input_channels = layer.input_shape[3]
+    h, w, output_channels = layer.output_shape[1:]
+  w_h, w_w = layer.kernel_size
+
+  n_neurons_output = h * w * output_channels
+  n_mult = w_h * w_w * n_neurons_output
+  n_add = (w_h * w_w - 1) * n_neurons_output
+
+  flops = n_mult + n_add
+
+  if layer.use_bias:
+    flops += n_neurons_output
+
+  return int(flops)
+
+
 def count_flops_efficient(model):
   flops = 0
   map_layer_to_count_fn = {
@@ -75,6 +96,7 @@ def count_flops_efficient(model):
       tf.python.keras.layers.ReLU: _count_flops_relu,
       tf.python.keras.layers.MaxPooling2D: _count_flops_maxpool2d,
       tf.python.keras.layers.core.Dense: _count_flops_dense,
+      tf.python.keras.layers.convolutional.DepthwiseConv2D: _count_flops_depthwiseconv2d
   }
   for layer in model.layers:
     if type(layer) in map_layer_to_count_fn:
