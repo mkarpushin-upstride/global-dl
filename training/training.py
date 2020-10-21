@@ -44,10 +44,14 @@ arguments = [
     ['namespace', 'configuration', [
         [bool, "mirrored", False, 'If true then use mirrored strategy'],
         [bool, "with_mixed_precision", False, 'To train with mixed precision'],
-        [bool, 'profiler', False, 'if true then profile tensorflow training using tensorboard. Need tf >=2.2'],
+        [bool, 'profiler', False, 'if true then profile tensorflow training using tensorboard. Need tf >=2.2'], # TODO move to debug namespace
     ]],
     ['list[int]', "input_size", [224, 224, 3], 'processed shape of each image'],
     [int, 'early_stopping', 20, 'stop  the training if validation loss doesn\'t decrease for n value'],
+    ['namespace', 'debug', [
+        [bool, 'write_graph', False, ''],
+        [bool, 'write_histogram', False, ''],
+    ]]
 ]
 
 
@@ -91,10 +95,10 @@ def define_model_in_strategy(args, get_model):
 
 def get_callbacks(args, log_dir):
   # define callbacks
-  if args['configuration']['profiler']:
-    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=False, write_images=False, profile_batch='10, 12')
-  else:
-    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=0, write_graph=False, write_images=False, profile_batch=0)
+  histogram_freq = 1 if args['debug']['write_histogram'] else 0
+  write_graph = args['debug']['write_graph']
+  profile_batch = '10, 12' if args['configuration']['profiler'] else 0
+  tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=histogram_freq, write_graph=write_graph, write_images=False, profile_batch=profile_batch)
   callbacks = [tensorboard_cb, tf.keras.callbacks.EarlyStopping('val_loss', patience=args['early_stopping'])]
   if args['optimizer']['lr_decay_strategy']['activate']:
     callbacks.append(
