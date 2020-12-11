@@ -39,15 +39,13 @@ arguments = [
     [str, 'title', '', 'title of the experiment'],
     [str, 'description', '', 'description of the experiment'],
     [str, "log_dir", '', 'Log directory', create_dir],
-    [int, "num_classes", 0, 'Number of classes', lambda x: x > 0],  # TODO this number should be computed from dataset
     [int, "num_epochs", 60, 'The number of epochs to run', lambda x: x > 0],
     ['namespace', 'configuration', [
         [bool, "mirrored", False, 'If true then use mirrored strategy'],
         [bool, "with_mixed_precision", False, 'To train with mixed precision'],
         [bool, 'profiler', False, 'if true then profile tensorflow training using tensorboard. Need tf >=2.2'], # TODO move to debug namespace
     ]],
-    ['list[int]', "input_size", [224, 224, 3], 'processed shape of each image'],
-    [int, 'early_stopping', 20, 'stop  the training if validation loss doesn\'t decrease for n value'],
+    [int, 'early_stopping', 1000000, 'stop  the training if validation loss doesn\'t decrease for n value'],
     ['namespace', 'debug', [
         [bool, 'write_graph', False, ''],
         [bool, 'write_histogram', False, ''],
