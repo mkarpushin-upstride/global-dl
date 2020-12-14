@@ -81,7 +81,7 @@ class StepDecay(object):
   Args:
       initial_lr (float): initial learning rate when the traning starts
       drop_rate (float): drop_rate defines ratio to multiply the learning rate
-      drop_after_num_epoch (int): after how many epochs the drop_rate has to be applied
+      drop_after_num_epoch (float): after how many epochs the drop_rate has to be applied
 
   returns: float adjusted learning rate and keep the value greater than the _END_LEARNING_RATE 
   """
@@ -303,7 +303,13 @@ def get_optimizer(optimizer_param: dict):
       'sgd_momentum': SGD(lr, momentum=optimizer_param['momentum'], **kwargs),
       'sgd_nesterov': SGD(lr, momentum=optimizer_param['momentum'], nesterov=True, **kwargs),
       'nadam': Nadam(lr, **kwargs),
-      'rmsprop': RMSprop(lr, **kwargs),
+      'rmsprop': RMSprop(lr,
+          rho=optimizer_param.get("rho", 0.9),
+          momentum=optimizer_param.get("momentum", 0.0),
+          epsilon=optimizer_param.get("epsilon", 1e-07),
+          centered=optimizer_param.get("centered", False),
+          **kwargs
+      ),
   }
 
   return optimizer[optimizer_name]
